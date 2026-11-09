@@ -2,5 +2,11 @@ packages:
   - apps/*
   - packages/*
 
+# Install scripts are denied on purpose (supply-chain risk). esbuild works without its postinstall.
+allowBuilds:
+  esbuild: false
+
 overrides:
   minimatch: ^11.0.1
+  # GHSA-67mh-4wv8-2f99: drizzle-kit pulls esbuild 0.18.20 through @esbuild-kit/core-utils (dev only).
+  'esbuild@<0.25.0': 0.25.12
