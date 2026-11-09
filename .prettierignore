@@ -3,3 +3,4 @@ LICENSE
 dist/
 coverage/
 .turbo/
+apps/server/migrations/meta

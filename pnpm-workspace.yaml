@@ -2,5 +2,9 @@ packages:
   - apps/*
   - packages/*
 
+# Install scripts are denied on purpose (supply-chain risk). esbuild works without its postinstall.
+allowBuilds:
+  esbuild: false
+
 overrides:
   minimatch: ^11.0.1
