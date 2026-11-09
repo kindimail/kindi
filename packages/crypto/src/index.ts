@@ -4,6 +4,7 @@ export { decrypt, encrypt } from './aead.ts';
 export { generateMailboxKeyPair, openKey, sealKey } from './seal.ts';
 export type { MailboxKeyPair } from './seal.ts';
 export {
+  deriveSubkey,
   generateRecoveryKey,
   generateUmk,
   recoveryKeyToSecret,

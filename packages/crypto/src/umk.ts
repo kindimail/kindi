@@ -92,6 +92,22 @@ export function unwrapUmk(
   }
 }
 
+/**
+ * Derives a 32-byte key from the UMK for one purpose (for example "contacts" or
+ * "mailbox-key"). The UMK itself is never used to encrypt data: every use gets its own
+ * subkey, so a leaked subkey does not expose the UMK or the other subkeys.
+ * The caller should zero the result after use.
+ */
+export function deriveSubkey(umk: Uint8Array, purpose: string): Uint8Array {
+  if (umk.length !== UMK_LEN) throw new Error('umk must be 32 bytes');
+  // A strict format keeps the HKDF label unambiguous and stable across clients.
+  // The typeof check matters: RegExp.test would turn undefined into the purpose "undefined".
+  if (typeof purpose !== 'string' || !/^[a-z0-9-]{1,64}$/.test(purpose)) {
+    throw new Error('invalid subkey purpose');
+  }
+  return hkdf(sha256, umk, undefined, utf8.encode(`kindi/v1/subkey/${purpose}`), 32);
+}
+
 /** A new recovery key: 24 words (256 bits + checksum, BIP39 English list). Show it once. */
 export function generateRecoveryKey(): string {
   const entropy = randomBytes(32);

@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
   decrypt,
+  deriveSubkey,
+  encrypt,
   generateRecoveryKey,
   generateUmk,
   recoveryKeyToSecret,
@@ -69,6 +71,37 @@ test('a wrapped UMK opens with a KEK derived outside the module (WebCrypto HKDF)
   const wrapped = wrapUmk(secret, 'password', umk, slot, user);
   const aad = utf8.encode('kindi/v1/umk-wrapuser-1');
   assert.deepEqual(decrypt(new Uint8Array(kek), wrapped, slot, aad), umk);
+});
+
+test('subkeys: stable, different per purpose and per UMK, strict purpose format', async () => {
+  const umk = new Uint8Array(32).fill(9);
+  const a = deriveSubkey(umk, 'contacts');
+  assert.equal(a.length, 32);
+  assert.deepEqual(deriveSubkey(umk, 'contacts'), a);
+  assert.notDeepEqual(deriveSubkey(umk, 'settings'), a);
+  assert.notDeepEqual(deriveSubkey(new Uint8Array(32).fill(8), 'contacts'), a);
+  assert.notDeepEqual(a, umk);
+
+  // independent check with WebCrypto HKDF
+  const ikm = await crypto.subtle.importKey('raw', umk, 'HKDF', false, ['deriveBits']);
+  const info = utf8.encode('kindi/v1/subkey/contacts');
+  const params = { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(), info };
+  assert.deepEqual(a, new Uint8Array(await crypto.subtle.deriveBits(params, ikm, 256)));
+
+  for (const bad of ['', 'Contacts', 'a/b', 'a b', 'ı', 'x'.repeat(65)]) {
+    assert.throws(() => deriveSubkey(umk, bad), /purpose/, `"${bad}" was accepted`);
+  }
+  assert.throws(() => deriveSubkey(umk, undefined as unknown as string), /purpose/);
+  assert.throws(() => deriveSubkey(umk, null as unknown as string), /purpose/);
+  assert.throws(() => deriveSubkey(new Uint8Array(31), 'contacts'), /32 bytes/);
+});
+
+test('a subkey encrypts data that the UMK itself cannot open', () => {
+  const umk = generateUmk();
+  const key = deriveSubkey(umk, 'contacts');
+  const record = encrypt(key, utf8.encode('hello'), slot);
+  assert.deepEqual(decrypt(key, record, slot), utf8.encode('hello'));
+  assert.throws(() => decrypt(umk, record, slot));
 });
 
 test('recovery key: 24 words, round trip, forgiving input, checksum', () => {
