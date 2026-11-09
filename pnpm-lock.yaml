@@ -199,6 +199,9 @@ importers:
       '@noble/post-quantum':
         specifier: 0.7.1
         version: 0.7.1
+      '@scure/bip39':
+        specifier: 2.4.0
+        version: 2.4.0
     devDependencies:
       '@types/node':
         specifier: ^24.0.0
@@ -298,6 +301,9 @@ packages:
   '@noble/post-quantum@0.7.1':
     resolution: {integrity: sha512-+P9981IiAnVh+rmcubozzVwrEy3XsN/tMhTnvsjV9VDaYpOnNCqWqKo2FLWxbu92YHfjGIlE5XnW175UK+ln+Q==}
     engines: {node: '>= 20.19.0'}
+
+  '@scure/bip39@2.4.0':
+    resolution: {integrity: sha512-82dxFbZUYboyOf0AXiydsQrFQ5Q4h9mX+O2UkE91ROYmsc0BKMGZLwDmy96Jpa2+vrtoxomjUhy1RPIgH/r2nA==}
 
   '@turbo/darwin-64@2.11.10':
     resolution: {integrity: sha512-By4idRap5+nLnMuRzLB4qkOPRlvNdyY1ne4VJYDyUoUB11H94k7uif9mbe3JT8JSNXs1D68uMcBj6hJ/jMQRvA==}
@@ -770,6 +776,10 @@ snapshots:
     dependencies:
       '@noble/ciphers': 2.4.0
       '@noble/curves': 2.4.0
+      '@noble/hashes': 2.4.0
+
+  '@scure/bip39@2.4.0':
+    dependencies:
       '@noble/hashes': 2.4.0
 
   '@turbo/darwin-64@2.11.10':
